@@ -227,12 +227,36 @@ module base() {
             translate([hlk_w-1, hlk_d/2 - 5, 0]) cube([1.5, 10, floor_h + standoff_h]);
         }
 
-        // ESP32 cradle - friction fit (backstop overlaps rails to avoid edge-only contact)
+        // ESP32 cradle - retained mount
         translate([esp_x, esp_y, 0]) {
-            rail_h = floor_h + standoff_h + esp_h * 0.6;
+            board_z = floor_h;  // board sits on floor
+            rail_h = board_z + esp_h + 1;  // rails extend 1mm above board top
+            lip_overhang = 1;  // inward lip to hold board down
+            usb_w = 9;    // USB-C port cutout width
+            usb_h = 3.5;  // USB-C port cutout height
+
+            // Side rails
             translate([-1.2, 0, 0]) cube([1.2, esp_d, rail_h]);
             translate([esp_w, 0, 0]) cube([1.2, esp_d, rail_h]);
-            translate([-1.2, -1.2, 0]) cube([esp_w + 2.4, 1.2, floor_h + standoff_h + 3]);
+
+            // Retaining lips on top of side rails (overhang inward)
+            translate([-1.2, 2, rail_h - 1])
+                cube([1.2 + lip_overhang, esp_d - 4, 1]);
+            translate([esp_w - lip_overhang, 2, rail_h - 1])
+                cube([1.2 + lip_overhang, esp_d - 4, 1]);
+
+            // Back stop (closed end, overlaps rails)
+            translate([-1.2, -1.2, 0])
+                cube([esp_w + 2.4, 1.2, board_z + esp_h]);
+
+            // Front wall with USB-C cutout (open end)
+            difference() {
+                translate([-1.2, esp_d, 0])
+                    cube([esp_w + 2.4, 1.2, board_z + esp_h]);
+                // USB-C port opening (centered on board width)
+                translate([esp_w/2 - usb_w/2, esp_d - 0.1, board_z + esp_h - usb_h - 1])
+                    cube([usb_w, 1.4, usb_h + 1.1]);
+            }
         }
     }
 }
