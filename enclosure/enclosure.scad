@@ -227,35 +227,33 @@ module base() {
             translate([hlk_w-1, hlk_d/2 - 5, 0]) cube([1.5, 10, floor_h + standoff_h]);
         }
 
-        // ESP32 cradle - retained mount
+        // ESP32 cradle - pin header channel mount
+        // Two raised rails with slots that the soldered pin headers slide into.
+        // Board slides in along Y axis (USB-C end last), pins grip in channels.
         translate([esp_x, esp_y, 0]) {
-            board_z = floor_h;  // board sits on floor
-            rail_h = board_z + esp_h + 1;  // rails extend 1mm above board top
-            lip_overhang = 1;  // inward lip to hold board down
-            usb_w = 9;    // USB-C port cutout width
-            usb_h = 3.5;  // USB-C port cutout height
+            pin_pitch = 2.54;
+            slot_w = 0.9;       // channel width (0.64mm pin + clearance)
+            slot_depth = 2.5;   // how deep pins sit in channel
+            rail_w = 2.5;       // rail width (wall around channel)
+            rail_h = floor_h + slot_depth;  // total rail height from Z=0
+            pin_row_x = 0;      // left pin row at board left edge
 
-            // Side rails
-            translate([-1.2, 0, 0]) cube([1.2, esp_d, rail_h]);
-            translate([esp_w, 0, 0]) cube([1.2, esp_d, rail_h]);
-
-            // Retaining lips on top of side rails (overhang inward)
-            translate([-1.2, 2, rail_h - 1])
-                cube([1.2 + lip_overhang, esp_d - 4, 1]);
-            translate([esp_w - lip_overhang, 2, rail_h - 1])
-                cube([1.2 + lip_overhang, esp_d - 4, 1]);
-
-            // Back stop (closed end, overlaps rails)
-            translate([-1.2, -1.2, 0])
-                cube([esp_w + 2.4, 1.2, board_z + esp_h]);
-
-            // Front wall with USB-C cutout (open end)
+            // Left rail (at X=0 edge of board)
             difference() {
-                translate([-1.2, esp_d, 0])
-                    cube([esp_w + 2.4, 1.2, board_z + esp_h]);
-                // USB-C port opening (centered on board width)
-                translate([esp_w/2 - usb_w/2, esp_d - 0.1, board_z + esp_h - usb_h - 1])
-                    cube([usb_w, 1.4, usb_h + 1.1]);
+                translate([-rail_w/2 - slot_w/2, 0, 0])
+                    cube([rail_w, esp_d, rail_h]);
+                // Channel slot
+                translate([-slot_w/2, -0.1, rail_h - slot_depth])
+                    cube([slot_w, esp_d + 0.2, slot_depth + 0.1]);
+            }
+
+            // Right rail (at X=esp_w edge of board)
+            difference() {
+                translate([esp_w - rail_w/2 + slot_w/2, 0, 0])
+                    cube([rail_w, esp_d, rail_h]);
+                // Channel slot
+                translate([esp_w - slot_w/2, -0.1, rail_h - slot_depth])
+                    cube([slot_w, esp_d + 0.2, slot_depth + 0.1]);
             }
         }
     }
